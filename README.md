@@ -9,7 +9,7 @@ Built as a coding project by Duncan Cameron and his Mum.
 ## Live Demo
 
 Try it here:  
-https://cameronclancode.github.io/Algebra/
+https://cameronclancode.github.io/Algebra/algebra.html
 
 ---
 

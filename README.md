@@ -15,16 +15,17 @@ https://cameronclancode.github.io/Algebra/
 
 ## Screenshot
 
-![Algebra app screenshot](<img width="1580" height="381" alt="CaptureAlgebra" src="https://github.com/user-attachments/assets/c2f7336a-d4c7-4fd7-92d5-6d4bc9965771" />
-)
+
+<img width="1580" height="381" alt="CaptureAlgebra" src="https://github.com/user-attachments/assets/5500d28c-0374-4d81-b76f-ca8bc573bb6d" />
 
 ---
 
 ## How it Works
-
-- Generates algebra problems
-- Lets the user enter an answer
+- Lets the user enter an answer to algebra problems (using A for any missing value)
 - Checks whether the answer is correct
+  - Keeps a score
+  - Changes the backround colour and uses sounds for right or wrong answers
+  - Celebrates scores over 50 with a dancing Llama image   
 - Designed to help practise basic algebra skills
 
 ---

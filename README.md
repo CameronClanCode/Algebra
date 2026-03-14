@@ -10,7 +10,7 @@ Built as a coding project by Duncan Cameron and his Mum.
 
 Try it here:  
 https://cameronclancode.github.io/Algebra/algebra.html
-
+or https://cameronclancode.github.io/Algebra/algebra.html?param=llama for celebratory images for every 5 correct answers
 ---
 
 ## Screenshot

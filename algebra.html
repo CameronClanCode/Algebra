@@ -43,90 +43,128 @@
         height: 0; /* Makes it invisible */
       }
 
-.score {
+      .score {
         flex-basis: 100%; /* Forces this item to take the whole row */
       }
 
+      .flash-green {
+        animation: flash-green 0.6s infinite alternate;
+      }
 
-.flash-green {
-  animation: flash-green 0.6s infinite alternate;
-}
+      .flash-red {
+        animation: flash-red 0.6s infinite alternate;
+      }
 
-.flash-red {
-  animation: flash-red 0.6s infinite alternate;
-}
+      @keyframes flash-green {
+        from {
+          background-color: #00ff00;
+        }
+        to {
+          background-color: #009900;
+        }
+      }
 
-@keyframes flash-green {
-  from { background-color: #00ff00; }
-  to   { background-color: #009900; }
-}
+      @keyframes flash-red {
+        from {
+          background-color: #ff0000;
+        }
+        to {
+          background-color: #990000;
+        }
+      }
 
-@keyframes flash-red {
-  from { background-color: #ff0000; }
-  to   { background-color: #990000; }
-}
+      #winOverlay {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none;
+        z-index: 1000;
+        pointer-events: none;
+      }
 
-#winOverlay{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  display:none;
-  z-index:1000;
-  pointer-events:none; 
-}
+      #imageGif {
+        max-width: 100vw;
+        max-height: 100vh;
+        animation: bounce 0.6s infinite;
+      }
 
-#llamaGif{
-  max-width:100vw;
-  max-height:100vh;
-  animation: bounce 0.6s infinite;
-}
+      @keyframes bounce {
+        0% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-40px);
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
+      #imageConfetti {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 999;
+        overflow: visible; /* allow confetti to fall outside the container */
+      }
+      .confettiImage {
+        position: absolute;
+        width: 10px; /* small confetti */
+        animation:
+          fall 4s linear forwards,
+          spin 2s linear infinite;
+      }
 
-@keyframes bounce{
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(-40px); }
-  100% { transform: translateY(0); }
-}
-#llamaConfetti{
-  position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  pointer-events:none;
-  overflow:hidden;
-  z-index:999;
-}
+      @keyframes fall {
+        0% {
+          top: -10%;
+        } /* start above screen */
+        100% {
+          top: 110%;
+        } /* fall past bottom of screen */
+      }
 
-.confettiLlama{
-  position:absolute;
-  width:60px;
-  animation: fall 4s linear forwards, spin 2s linear infinite;
-}
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
 
-@keyframes fall{
-  from { transform: translateY(-100px); }
-  to   { transform: translateY(110vh); }
-}
-
-@keyframes spin{
-  from { rotate:0deg; }
-  to   { rotate:360deg; }
-}
-
+      @keyframes bounceConfetti {
+        0% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-15px); /* small bounce up */
+        }
+        50% {
+          transform: translateY(0);
+        }
+        70% {
+          transform: translateY(-7px); /* smaller second bounce */
+        }
+        100% {
+          transform: translateY(0);
+        }
+      }
     </style>
   </head>
-   <body>
-<div id="winOverlay">
-  <img src="llama.gif" id="llamaGif">
-</div>
-<div id="llamaConfetti"></div>
-   <div class="score" id="score">Score:0</div>
-<audio id="correctSound" src="horray.mp3"></audio>
-<audio id="wrongSound" src="boo.mp3"></audio>
-<div class="break"></div>
+  <body>
+    <div id="winOverlay">
+      <img src="llama.gif" id="llamaGif" style="display: none" />
+      <img src="axolotl.gif" id="axolotlGif" style="display: none" />
+    </div>
+    <div id="imageConfetti"></div>
+    <div class="score" id="score">Score:0</div>
+    <audio id="correctSound" src="horray.mp3"></audio>
+    <audio id="wrongSound" src="boo.mp3"></audio>
+    <div class="break"></div>
 
-
-                                             
     <input type="text" id="sum1" placeholder="Type something..." />
 
     <select id="operator">
@@ -152,99 +190,149 @@
     <div class="break"></div>
 
     <div id="output"></div>
-             <div class="break"></div>
+    <div class="break"></div>
     <button onclick="reset()">reset</button>
     <div class="break"></div>
 
     <script>
+      // Get current URL
+      const url = new URL(window.location.href);
 
-let score = 0;
+      // Check for a parameter
+      const paramValue = url.searchParams.get("param");
 
-function showLlama(){
+      let score = 0;
+      let elementId = 0;
 
-  const overlay = document.getElementById("winOverlay");
-  const llama = document.getElementById("llamaGif");
+      function showImage(imageType) {
+        const overlay = document.getElementById("winOverlay");
+        const images = overlay.querySelectorAll("img");
 
-  let level = Math.floor(score / 10);
+        images.forEach((img) => (img.style.display = "none"));
 
-  // scale from 0.25 to 1.0
-  let scale = 0.25 + (level * 0.1);
+        let elementId = "";
+        if (imageType === "llama") {
+          elementId = "llamaGif";
+        } else if (imageType === "axolotl") {
+          elementId = "axolotlGif";
+        }
 
-  if (scale > 1) scale = 1;
+        const imageYay = document.getElementById(elementId);
+        if (!imageYay) return;
 
-  llama.style.width = (scale * 100) + "vw";
+        imageYay.style.display = "block";
 
-  overlay.style.display = "block";
+        // --- Scaling logic ---
+        let baseWidth, maxWidth, scaleFactor;
 
-  // show longer each time (max 10 seconds)
-  let time = 3000 + level * 1000;
-  if (time > 10000) time = 10000;
+        if (imageType === "llama") {
+          baseWidth = 240; // starting width in px
+          maxWidth = 440; // max width
+          scaleFactor = 1.3; // exponential-ish factor
+          // Llama only shows 5 times: we map 1–5 to width
+          let timesShown = Math.min(Math.floor(score / 5), 5);
+          imageYay.style.width =
+            Math.min(baseWidth * Math.pow(scaleFactor, timesShown), maxWidth) +
+            "px";
+        } else if (imageType === "axolotl") {
+          baseWidth = 300; // starting width in px
+          maxWidth = 500; // max width
+          scaleFactor = 1.2; // gentler exponential
+          let timesShown = Math.floor((score - 75) / 5); // axolotl shows 75+
+          if (timesShown < 0) timesShown = 0;
+          imageYay.style.width =
+            Math.min(baseWidth * Math.pow(scaleFactor, timesShown), maxWidth) +
+            "px";
+        }
 
-  setTimeout(function(){
-    overlay.style.display = "none";
-  }, time);
-}
+        overlay.style.display = "block";
 
-function llamaConfetti(){
+        // Hide after a few seconds (adjust if you want)
+        setTimeout(() => {
+          imageYay.style.display = "none";
+        }, 3000);
+      }
+      function showImageConfetti(imageType) {
+        const container = document.getElementById("imageConfetti");
 
-  const container = document.getElementById("llamaConfetti");
+        // Determine a "main image size" for scaling confetti
+        let mainImageWidth = imageType === "llama" ? 240 : 300; // same as baseWidth
+        let confettiMin = mainImageWidth / 3; // min width ~1/3 of main image
+        let confettiMax = mainImageWidth / 2; // max width ~1/2 of main image
 
-  for(let i = 0; i < 20; i++){
+        for (let i = 0; i < 20; i++) {
+          const yayImage = document.createElement("img");
+          yayImage.src = imageType + ".gif";
+          yayImage.className = "confettiImage";
 
-    const llama = document.createElement("img");
+          // Random horizontal position
+          yayImage.style.left = Math.random() * 100 + "vw";
 
-    llama.src = "llama.gif";
-    llama.className = "confettiLlama";
+          // Random size scaled relative to main image
+          const size =
+            confettiMin + Math.random() * (confettiMax - confettiMin);
+          yayImage.style.width = size + "px";
 
-    llama.style.left = Math.random() * 100 + "vw";
-    llama.style.animationDelay = Math.random() * 2 + "s";
+          // Random starting height above the screen
+          yayImage.style.top = -Math.random() * 100 + "px";
 
-    container.appendChild(llama);
+          // Random animation delay
+          yayImage.style.animationDelay = Math.random() * 2 + "s";
 
-    setTimeout(() => {
-      llama.remove();
-    },4000);
+          // Append to container
+          container.appendChild(yayImage);
 
-  }
-}
+          // Let it fall
+          yayImage.style.animation = `fall 4s linear forwards, spin ${2 + Math.random() * 2}s linear infinite`;
 
-function addPoint() {
-  score++;
-  document.getElementById("score").innerText = "Score: "+ score;
-const sound = document.getElementById("correctSound");
-  sound.currentTime = 0;
-  sound.play();
+          // Remove after falling
+          setTimeout(() => {
+            yayImage.remove();
+          }, 4000); // duration of fall
+        }
+      }
 
- if ((score % 10 === 0) && (score > 0)) {
-   showLlama();
-  }
+      function addPoint() {
+        score++;
+        document.getElementById("score").innerText = "Score: " + score;
+        const sound = document.getElementById("correctSound");
+        sound.currentTime = 0;
+        sound.play();
 
-if (score >= 50 && score % 10 === 0) {
-  llamaConfetti();
-}
-}
+        if (paramValue === "llama_" && score % 5 === 0 && score > 0) {
+          if (score >= 75) {
+            // 75+ → axolotl confetti only
+            showImageConfetti("axolotl");
+          } else if (score >= 50) {
+            // 50–70 → axolotl image only
+            showImage("axolotl");
+          } else if (score >= 25) {
+            // 25–45 → llama confetti only
+            showImageConfetti("llama");
+          } else if (score >= 4) {
+            // 5–20 → llama image only
+            showImage("llama");
+          }
+        }
+      }
 
-function deletePoint() {
-  score--;
-  document.getElementById("score").innerText = "Score: "+ score;
-const sound = document.getElementById("wrongSound");
-  sound.currentTime = 0;
-  sound.play();
-}
-
+      function deletePoint() {
+        score--;
+        document.getElementById("score").innerText = "Score: " + score;
+        const sound = document.getElementById("wrongSound");
+        sound.currentTime = 0;
+        sound.play();
+      }
 
       function reset() {
-document.body.classList.remove("flash-green", "flash-red");
- document.getElementById("output").innerText = "";
-document.getElementById("operator").value = "+";
-document.getElementById("sum1").value = "";
-document.getElementById("sum2").value = "";
-document.getElementById("sum_answer").value = "";
-document.getElementById("answer").value = "";
-}
-
-
-
+        document.body.classList.remove("flash-green", "flash-red");
+        document.getElementById("output").innerText = "";
+        document.getElementById("operator").value = "+";
+        document.getElementById("sum1").value = "";
+        document.getElementById("sum2").value = "";
+        document.getElementById("sum_answer").value = "";
+        document.getElementById("answer").value = "";
+      }
 
       function checkTheSum(sum1, op, sum2, sum_answer) {
         // 1. Get the numbers and the operator
@@ -272,7 +360,6 @@ document.getElementById("answer").value = "";
         }
       }
 
-
       function displayValue() {
         // Get the values from the input fields
         var val = document.getElementById("answer").value;
@@ -286,47 +373,38 @@ document.getElementById("answer").value = "";
         if (op == "A") {
           // If operator is A, use the calculate function
           op = document.getElementById("answer").value;
-          answer =
-            checkTheSum(sum1, op, sum2, sum_answer);
+          answer = checkTheSum(sum1, op, sum2, sum_answer);
         } else if (sum1.toUpperCase() == "A") {
           // Case where sum1 is A
-           
-sum1 = document.getElementById("answer").value;
-          answer =
-            checkTheSum(sum1, op, sum2, sum_answer);
-        } else if (sum2.toUpperCase() == "A"){
+
+          sum1 = document.getElementById("answer").value;
+          answer = checkTheSum(sum1, op, sum2, sum_answer);
+        } else if (sum2.toUpperCase() == "A") {
           // Case where sum2 is A
           sum2 = document.getElementById("answer").value;
-          answer =
-            checkTheSum(sum1, op, sum2, sum_answer);
-        } else if (sum_answer.toUpperCase() == "A"){
+          answer = checkTheSum(sum1, op, sum2, sum_answer);
+        } else if (sum_answer.toUpperCase() == "A") {
           // Case where sum_answer is A
-         sum_answer = document.getElementById("answer").value;
-          answer =
-             checkTheSum(sum1, op, sum2, sum_answer);
+          sum_answer = document.getElementById("answer").value;
+          answer = checkTheSum(sum1, op, sum2, sum_answer);
         } else {
           // Case where sum is complete
-          answer =
-             checkTheSum(sum1, op, sum2, sum_answer);
+          answer = checkTheSum(sum1, op, sum2, sum_answer);
         }
 
         // Display it in the output div
 
-     document.body.classList.remove("flash-green", "flash-red");
+        document.body.classList.remove("flash-green", "flash-red");
 
         document.getElementById("output").innerText = answer;
-      if (answer.toLowerCase().includes("correct")) {
-
-     document.body.classList.add("flash-green");
-     addPoint()
-
-     }
-     else if (answer.toLowerCase().includes("wrong")) {
-       document.body.classList.add("flash-red");
-       deletePoint()
-
-}
-}
+        if (answer.toLowerCase().includes("correct")) {
+          document.body.classList.add("flash-green");
+          addPoint();
+        } else if (answer.toLowerCase().includes("wrong")) {
+          document.body.classList.add("flash-red");
+          deletePoint();
+        }
+      }
     </script>
   </body>
 </html>

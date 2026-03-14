@@ -6,12 +6,12 @@ Built as a coding project by Duncan Cameron and his Mum.
 
 ---
 
-## Live Demo
+# Live Site
 
-Try it here:  
-https://cameronclancode.github.io/Algebra/algebra.html
-or https://cameronclancode.github.io/Algebra/algebra.html?param=llama for celebratory images for every 5 correct answers
----
+
+
+
+Try it here: https://cameronclancode.github.io/Algebra/algebra.html? (or add ?param=llama_ to the url for some images)
 
 ## Screenshot
 
